@@ -15,24 +15,34 @@ export default function NavigationBar() {
           imgWidth={19.2}
           imgHeight={19.2}
           text="커뮤니티"
+          onClick={() => {
+            console.log("community");
+            window.location.href = "/communityPage";
+          }}
         />
         <NavButton
           imgSrc="/icons/navbar_icons/walk.svg"
           imgWidth={16}
           imgHeight={25.6}
           text="산책하기"
+          onClick={() => {
+            console.log("community");
+            window.location.href = "/walkPage";
+          }}
         />
         <NavButton
           imgSrc="/icons/navbar_icons/favorite.svg"
           imgWidth={14.4}
           imgHeight={18}
           text="찜"
+          onClick={() => {}}
         />
         <NavButton
           imgSrc="/icons/navbar_icons/profile.svg"
           imgWidth={17.6}
           imgHeight={19.56}
           text="프로필"
+          onClick={() => {}}
         />
       </div>
       <style jsx>{`
@@ -62,9 +72,9 @@ export default function NavigationBar() {
   );
 }
 
-function NavButton({ imgSrc, imgWidth, imgHeight, text }) {
+function NavButton({ imgSrc, imgWidth, imgHeight, text, onClick }) {
   return (
-    <div className="container">
+    <div className="container" onClick={onClick}>
       <Image
         src={imgSrc}
         width={imgWidth}

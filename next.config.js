@@ -22,23 +22,32 @@ const nextConfig = {
     return [
       //cors
       {
-        source: "/:path*",
-        destination: `${process.env.WWWALk_SERVER_BASE_URL}/:path*`,
+        source: "/",
+        destination: "/homePage/",
       },
 
       {
         source: "/homePage",
-        destination: "/homePage/homePage",
+        destination: "/homePage/homePage/",
       },
 
       {
         source: "/walkPage",
-        destination: "/walkPage/walkPage",
+        destination: "/walkPage/walkPage/",
+      },
+      {
+        source: "/communityPage",
+        destination: "/communityPage/communityPage/",
       },
 
       {
         source: "/editPage",
-        destination: "/editPage/editPage",
+        destination: "/editPage/editPage/",
+      },
+
+      {
+        source: "/api/:path*",
+        destination: `${process.env.WWWALk_SERVER_BASE_URL}/api/:path*`,
       },
     ];
   },
