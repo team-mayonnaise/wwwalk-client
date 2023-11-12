@@ -8,8 +8,18 @@ import { render } from "react-dom";
 export default function Map() {
   ////전역
   useEffect(() => {
+    getAllPinFromServer();
     getCurrentLocation();
   }, []);
+
+  //// 데이터 fetch
+  function getAllPinFromServer() {
+    fetch("/api/v1/pin/all")
+      .then((res) => res.json())
+      .then((data) => {
+        setPins(data);
+      });
+  }
 
   //// 지도 관련
   const renderMap = useRef(false);
@@ -46,12 +56,12 @@ export default function Map() {
 
   //// 핀관련
   const [pins, setPins] = useState([
-    { pinId: "0", lon: 128.61382440584043, lat: 35.88549431313776 },
-    { pinId: "1", lon: 128.61357380484327, lat: 35.88569593117377 },
-    { pinId: "2", lon: 128.61294029961223, lat: 35.886127977017736 },
-    { pinId: "3", lon: 128.6122782530134, lat: 35.88624500438695 },
-    { pinId: "4", lon: 128.61169150798764, lat: 35.88625288087432 },
-    { pinId: "5", lon: 128.61087191370774, lat: 35.886245855568056 },
+    // { point_id: "0", lon: 128.61382440584043, lat: 35.88549431313776 },
+    // { point_id: "1", lon: 128.61357380484327, lat: 35.88569593117377 },
+    // { point_id: "2", lon: 128.61294029961223, lat: 35.886127977017736 },
+    // { point_id: "3", lon: 128.6122782530134, lat: 35.88624500438695 },
+    // { point_id: "4", lon: 128.61169150798764, lat: 35.88625288087432 },
+    // { point_id: "5", lon: 128.61087191370774, lat: 35.886245855568056 },
   ]);
   const [pinMarkers, setPinMarkers] = useState([]);
 
@@ -149,6 +159,12 @@ export default function Map() {
     renderSelectedPin({ pinInd: pinInd });
   }, [curClickedLocation]);
 
+  useEffect(() => {
+    if (selectedPinInd === null) return;
+
+    fetchRoute({ pin_id: pins[selectedPinInd].point_id });
+  }, [selectedPinInd]);
+
   function searchForClickedPin() {
     const nearlestDis = pins
       .map((val, ind) => {
@@ -175,104 +191,126 @@ export default function Map() {
   }, [selectedPinInd]);
 
   //선택된 핀의 루트
-  const [selectedPinRouteInfo, setSelectedPinRouteInfo] = useState({
-    // userNickName: String,
-    // routeDistance: number,
-    // routeDuration: number,
-    // routeDate: date,
-    // photo_url: String,
-    // memo: String,
-    points: [
-      {
-        point_id: 1,
-        lat: 35.88492799369972,
-        lon: 128.61019603467486,
-      },
+  const [selectedPinRouteInfo, setSelectedPinRouteInfo] = useState();
+  //   {
+  //   // userNickName: String,
+  //   // routeDistance: number,
+  //   // routeDuration: number,
+  //   // routeDate: date,
+  //   // photo_url: String,
+  //   // memo: String,
+  //   points: [
+  //     {
+  //       point_id: 1,
+  //       lat: 35.88492799369972,
+  //       lon: 128.61019603467486,
+  //     },
 
-      {
-        point_id: 2,
-        lat: 35.884924365159144,
-        lon: 128.60979454710966,
-      },
+  //     {
+  //       point_id: 2,
+  //       lat: 35.884924365159144,
+  //       lon: 128.60979454710966,
+  //     },
 
-      {
-        point_id: 3,
-        lat: 35.884929707128016,
-        lon: 128.60939600947307,
-      },
+  //     {
+  //       point_id: 3,
+  //       lat: 35.884929707128016,
+  //       lon: 128.60939600947307,
+  //     },
 
-      {
-        point_id: 4,
-        lat: 35.88463436741945,
-        lon: 128.60941217938537,
-      },
+  //     {
+  //       point_id: 4,
+  //       lat: 35.88463436741945,
+  //       lon: 128.60941217938537,
+  //     },
 
-      {
-        point_id: 5,
-        lat: 35.88437273706037,
-        lon: 128.60943456813223,
-      },
+  //     {
+  //       point_id: 5,
+  //       lat: 35.88437273706037,
+  //       lon: 128.60943456813223,
+  //     },
 
-      {
-        point_id: 6,
-        lat: 35.883965516874404,
-        lon: 128.60956197558485,
-      },
+  //     {
+  //       point_id: 6,
+  //       lat: 35.883965516874404,
+  //       lon: 128.60956197558485,
+  //     },
 
-      {
-        point_id: 7,
-        lat: 35.883592276200986,
-        lon: 128.60950736000288,
-      },
-    ],
-  });
-  const [selectedPinRoutePath, setSelectedPinRoutePath] = useState([]);
+  //     {
+  //       point_id: 7,
+  //       lat: 35.883592276200986,
+  //       lon: 128.60950736000288,
+  //     },
+  //   ],
+  // }
+  const [selectedPinRoutePath, setSelectedPinRoutePath] = useState(null);
 
   useEffect(() => {
+    console.log("selectedPinInd", selectedPinInd);
+    console.log("selectedPinRoutePath", selectedPinRoutePath);
+    if (selectedPinRoutePath != null) selectedPinRoutePath.setMap(null);
     if (kakaoMap === null) return;
-    if (selectedPinInd === null) {
-      if (selectedPinRoutePath !== null) {
-        erasePath();
-        setSelectedPinRoutePath(null);
-      }
-      return;
-    }
+    if (selectedPinRouteInfo === undefined) return;
+    // if (selectedPinInd === null) {
+    //   if (selectedPinRoutePath !== null) {
+    //     erasePath();
+    //     setSelectedPinRoutePath(null);
+    //   }
+    //   return;
+    // }
+
     setSelectedPinRoutePath(drawPath({ points: selectedPinRouteInfo.points }));
   }, [kakaoMap, selectedPinRouteInfo, selectedPinInd]);
 
   function drawPath({ points }) {
-    let curColor = 200;
-    const unit = (curColor - 0) / (points.length - 2);
-    let pointBefore = new kakao.maps.LatLng(points[0].lat, points[0].lon);
-    var newLinePath = [];
-    points.slice(1).forEach((point) => {
-      const hexColor = curColor.toString(16);
-      const linePath = [
-        pointBefore,
-        new kakao.maps.LatLng(point.lat, point.lon),
-      ];
+    // let curColor = 200;
+    // const unit = (curColor - 0) / (points.length - 2);
+    // let pointBefore = new kakao.maps.LatLng(points[0].lat, points[0].lon);
+    // var newLinePath = [];
+    // points.slice(1).forEach((point) => {
+    //   console.log(point);
+    //   const hexColor = curColor.toString(16);
+    //   const linePath = [
+    //     pointBefore,
+    //     new kakao.maps.LatLng(point.lat, point.lon),
+    //   ];
 
-      var polyline = new kakao.maps.Polyline({
-        path: linePath, // 선을 구성하는 좌표배열 입니다
-        strokeWeight: 5, // 선의 두께 입니다
-        strokeColor: "#" + hexColor + hexColor + hexColor, // 선의 색깔입니다
-        strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-        strokeStyle: "solid", // 선의 스타일입니다
-      });
+    //   var polyline = new kakao.maps.Polyline({
+    //     path: linePath, // 선을 구성하는 좌표배열 입니다
+    //     strokeWeight: 5, // 선의 두께 입니다
+    //     strokeColor: "#" + hexColor + hexColor + hexColor, // 선의 색깔입니다
+    //     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+    //     strokeStyle: "solid", // 선의 스타일입니다
+    //   });
 
-      polyline.setMap(kakaoMap);
-      newLinePath.push(polyline);
+    //   polyline.setMap(kakaoMap);
+    //   newLinePath.push(polyline);
 
-      curColor -= unit;
-      pointBefore = new kakao.maps.LatLng(point.lat, point.lon);
+    //   curColor -= unit;
+    //   pointBefore = new kakao.maps.LatLng(point.lat, point.lon);
+    // });
+
+    var newLinePath = points.map((point) => {
+      return new kakao.maps.LatLng(point.lat, point.lon);
     });
 
-    return newLinePath;
+    // 지도에 표시할 선을 생성합니다
+
+    var polyline = new kakao.maps.Polyline({
+      path: newLinePath, // 선을 구성하는 좌표배열 입니다
+      strokeWeight: 5, // 선의 두께 입니다
+      strokeColor: "#000000", // 선의 색깔입니다
+      strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+      strokeStyle: "solid", // 선의 스타일입니다
+    });
+
+    // 지도에 선을 표시합니다
+    polyline.setMap(kakaoMap);
+    return polyline;
   }
   function erasePath() {
-    selectedPinRoutePath.forEach((path) => {
-      path.setMap(null);
-    });
+    // console.log(selectedPinRoutePath);
+    selectedPinRoutePath.setMap(null);
   }
 
   //// 현재위치 관련
@@ -325,6 +363,16 @@ export default function Map() {
     kakaoMap.panTo(
       new kakao.maps.LatLng(currentLocation.lat, currentLocation.lon)
     );
+  }
+
+  ////선택한 핀의 루트 정보
+
+  function fetchRoute({ pin_id }) {
+    fetch(`/api/v1/pin/info?pin_id=${pin_id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setSelectedPinRouteInfo(data[0]);
+      });
   }
 
   return (
